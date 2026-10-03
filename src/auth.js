@@ -1,6 +1,8 @@
 import { supabase } from "./supabaseClient.js";
 
-// SIGNUP
+/* ============================
+   SIGNUP
+============================ */
 const signupForm = document.getElementById("signup-form");
 if (signupForm) {
   signupForm.addEventListener("submit", async (e) => {
@@ -15,7 +17,7 @@ if (signupForm) {
       return;
     }
 
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email,
       password
     });
@@ -29,7 +31,9 @@ if (signupForm) {
   });
 }
 
-// LOGIN
+/* ============================
+   LOGIN
+============================ */
 const loginForm = document.getElementById("login-form");
 if (loginForm) {
   loginForm.addEventListener("submit", async (e) => {
@@ -38,7 +42,7 @@ if (loginForm) {
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
 
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const { error } = await supabase.auth.signInWithPassword({
       email,
       password
     });
@@ -51,11 +55,53 @@ if (loginForm) {
   });
 }
 
-// LOGOUT
+/* ============================
+   LOGOUT
+============================ */
 const logoutBtn = document.getElementById("logout-btn");
 if (logoutBtn) {
   logoutBtn.addEventListener("click", async () => {
     await supabase.auth.signOut();
     window.location.href = "login.html";
   });
+}
+
+/* ============================
+   SAVE NOTE
+============================ */
+export async function saveNote(content) {
+  const { data: { user } } = await supabase.auth.getUser();
+
+  const { error } = await supabase
+    .from("notes")
+    .insert({
+      user_id: user.id,
+      content: content
+    });
+
+  if (error) {
+    alert(error.message);
+  } else {
+    alert("Note saved!");
+  }
+}
+
+/* ============================
+   LOAD NOTES
+============================ */
+export async function loadNotes() {
+  const { data: { user } } = await supabase.auth.getUser();
+
+  const { data, error } = await supabase
+    .from("notes")
+    .select("*")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    alert(error.message);
+    return [];
+  }
+
+  return data;
 }
