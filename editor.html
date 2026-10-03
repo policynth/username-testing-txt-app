@@ -5,12 +5,38 @@
   <title>Editor</title>
 </head>
 <body>
-  <h2>Your Text</h2>
+  <h2>Your Notes</h2>
 
-  <textarea id="text" rows="15" cols="60"></textarea><br>
-  <button id="save">Save</button>
+  <textarea id="note-input" rows="15" cols="60" placeholder="Write something..."></textarea><br>
+  <button id="save-btn">Save Note</button>
+
+  <h3>Saved Notes</h3>
+  <ul id="notes-list"></ul>
+
   <p><a href="logout.html">Logout</a></p>
 
-  <script type="module" src="src/editor.js"></script>
+  <script type="module">
+    import { saveNote, loadNotes } from "./src/auth.js";
+
+    document.getElementById("save-btn").addEventListener("click", async () => {
+      const content = document.getElementById("note-input").value;
+      await saveNote(content);
+      loadAndDisplayNotes();
+    });
+
+    async function loadAndDisplayNotes() {
+      const notes = await loadNotes();
+      const list = document.getElementById("notes-list");
+      list.innerHTML = "";
+
+      notes.forEach(note => {
+        const li = document.createElement("li");
+        li.textContent = note.content;
+        list.appendChild(li);
+      });
+    }
+
+    loadAndDisplayNotes();
+  </script>
 </body>
 </html>
